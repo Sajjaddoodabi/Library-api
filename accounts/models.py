@@ -6,6 +6,10 @@ class User(AbstractUser):
     address = models.CharField(max_length=300)
     is_librarian = models.BooleanField(default=False)
 
+    EMAIL_FIELD = "email"
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email"]
+
     def __str__(self):
         return self.username
 
@@ -19,8 +23,7 @@ class User(AbstractUser):
 
 class Librarian(models.Model):
     parent_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='librarian')
-    card_number = models.CharField(max_length=50)
-    status = models.CharField(choices=[], max_length=100)
+    card_number = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return self.parent_user.get_name

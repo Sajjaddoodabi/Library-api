@@ -8,6 +8,9 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         read_only_fields = ('is_librarian', 'is_active')
         fields = ['id', 'username', 'email', 'password', 'is_librarian', 'is_active']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
 
 class LibrarianSerializer(serializers.ModelSerializer):
