@@ -1,3 +1,6 @@
+import datetime
+
+import jwt
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -55,3 +58,40 @@ class LibrarianRegisterView(APIView):
         else:
             user_serializer = UserSerializer(user)
             return Response(user_serializer.data)
+
+
+class LoginView(APIView):
+    def post(self, request):
+        email = request.data['email']
+        password = request.data['password']
+        user = User.objects.filter(email=email).first()
+
+        if user is None:
+            response = {'detail': 'User with Not found!'}
+            return Response(response)
+
+        if not user.check_password(password):
+            response = {'detail': 'User with Not found!'}
+            return Response(response)
+
+        payload = {
+            'id': user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=60),
+            'iat': datetime.datetime.utcnow()
+        }
+
+        token = jwt.encode(payload, 'secret', algorithm='HS256')
+
+        response = Response()
+        response.set_cookie(key=jwt, value=token, httponly=True)
+
+        response.data = {'jwt': token}
+        return response
+
+
+class LogoutView(APIView):
+    def post(self, request):
+        response = Response()
+        response.delete_cookie('jwt')
+        response.data = {'detail': 'successfully logged out'}
+        return response
