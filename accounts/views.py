@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
 from accounts.models import User, Librarian
-from accounts.serializers import UserSerializer
+from accounts.serializers import UserSerializer, ChangePasswordSerializer
 
 
 class UserRegisterView(APIView):
@@ -120,3 +120,30 @@ def get_user(request):
     user = User.objects.filter(id=payload['id'])
 
     return user
+
+
+class ChangePasswordView(APIView):
+    def post(self, request):
+        serializer = ChangePasswordSerializer(request.data)
+        if serializer.is_valid():
+            current_password = serializer.data['current_password']
+            new_password = serializer.data['new_password']
+            confirm_password = serializer.data['confirm_password']
+
+            user: User = get_user(request)
+
+            if not user:
+                raise AuthenticationFailed('User NOT found!')
+            if user.check_password(current_password):
+                raise AuthenticationFailed('User NOT found!')
+
+            if new_password != confirm_password:
+                response = {'detail': 'passwords do NOT match!'}
+                return Response(response)
+
+            user.set_password(confirm_password)
+            ser = UserSerializer(user)
+            user.save()
+
+            return Response(ser.data)
+        return Response(serializer.errors)

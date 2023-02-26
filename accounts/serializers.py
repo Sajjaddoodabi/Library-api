@@ -18,3 +18,26 @@ class LibrarianSerializer(serializers.ModelSerializer):
         model = Librarian
         read_only_fields = ('is_librarian', 'is_active')
         fields = ['id', 'username', 'email', 'card_number', 'is_librarian', 'is_active']
+
+
+class ChangePasswordSerializer(serializers.ModelSerializer):
+    current_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+
+    new_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+
+    confirm_password = serializers.CharField(
+        required=True,
+        write_only=True,
+        style={'input_type': 'password'}
+    )
+    model = User
+    read_only_fields = ('is_librarian', 'is_active')
+    fields = ['current_password', 'new_password', 'confirm_password']
