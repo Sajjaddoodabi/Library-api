@@ -4,9 +4,10 @@ import jwt
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
+from rest_framework.generics import ListAPIView
 
 from accounts.models import User, Librarian
-from accounts.serializers import UserSerializer, ChangePasswordSerializer
+from accounts.serializers import UserSerializer, ChangePasswordSerializer, LibrarianSerializer
 
 
 class UserRegisterView(APIView):
@@ -120,6 +121,16 @@ def get_user(request):
     user = User.objects.filter(id=payload['id'])
 
     return user
+
+
+class UserLists(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class LibrarianLists(ListAPIView):
+    queryset = User.objects.filter(is_librarian=True)
+    serializer_class = LibrarianSerializer
 
 
 class ChangePasswordView(APIView):
