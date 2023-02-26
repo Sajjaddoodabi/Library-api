@@ -3,6 +3,7 @@ import datetime
 import jwt
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
 from accounts.models import User, Librarian
 from accounts.serializers import UserSerializer
@@ -95,3 +96,27 @@ class LogoutView(APIView):
         response.delete_cookie('jwt')
         response.data = {'detail': 'successfully logged out'}
         return response
+
+
+class UserView(APIView):
+    def get(self, request):
+        user = get_user(request)
+        if not user:
+            raise AuthenticationFailed('User NOT found!')
+
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
+
+def get_user(request):
+    token = request.COOKIES.get('jwt')
+    if not token:
+        raise AuthenticationFailed('Unauthenticated!')
+    try:
+        payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationFailed('Unauthenticated!')
+
+    user = User.objects.filter(id=payload['id'])
+
+    return user
