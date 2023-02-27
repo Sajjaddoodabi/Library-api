@@ -1,5 +1,22 @@
+import jwt
 from rest_framework.permissions import SAFE_METHODS, BasePermission
-from .views import get_user
+from rest_framework_simplejwt.exceptions import AuthenticationFailed
+
+from accounts.models import User
+
+
+def get_user(request):
+    token = request.COOKIES.get('jwt')
+    if not token:
+        raise AuthenticationFailed('Unauthenticated!')
+    try:
+        payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        raise AuthenticationFailed('Unauthenticated!')
+
+    user = User.objects.filter(id=payload['id']).first()
+
+    return user
 
 
 class IsAuthenticated(BasePermission):
