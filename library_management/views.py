@@ -49,13 +49,20 @@ class AddBookToOrderView(APIView):
 
 class BookOrderDetailView(APIView):
     def get(self, request, pk):
-        pass
+        order = BookOrder.objects.filter(pk=pk).first()
+        serializer = BookOrderSerializer(order)
+
+        return Response(serializer.data)
 
     def put(self, request, pk):
         pass
 
     def delete(self, request, pk):
-        pass
+        order = BookOrder.objects.filter(pk=pk).first()
+        order.delete()
+
+        response = {'detail': f'book order with id {order.id} deleted successfully!'}
+        return Response(response)
 
 
 class BookOrderListView(ListAPIView):
@@ -85,13 +92,20 @@ class CreateBookIssueView(APIView):
 
 class BookIssueDetailView(APIView):
     def get(self, request, pk):
-        pass
+        book_issue = BookIssue.objects.filter(pk=pk).first()
+        serializer = BookIssueSerializer(book_issue)
+
+        return Response(serializer.data)
 
     def put(self, request, pk):
         pass
 
     def delete(self, request, pk):
-        pass
+        book_issue = BookIssue.objects.filter(pk=pk).first()
+        book_issue.delete()
+
+        response = {'detail': f'book issue with id {book_issue.id} deleted successfully!'}
+        return Response(response)
 
 
 class BookIssueListView(ListAPIView):
