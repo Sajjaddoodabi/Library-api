@@ -52,22 +52,22 @@ class CreateGenreView(APIView):
         pass
 
 
-class GenreDetail(RetrieveUpdateDestroyAPIView):
+class GenreDetailView(RetrieveUpdateDestroyAPIView):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
-class GenreList(ListAPIView):
+class GenreListView(ListAPIView):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
-class CreateBookIssue(APIView):
+class CreateBookIssueView(APIView):
     def post(self, request):
         pass
 
 
-class BookIssueDetail(APIView):
+class BookIssueDetailView(APIView):
     def get(self, request, pk):
         pass
 
@@ -78,6 +78,6 @@ class BookIssueDetail(APIView):
         pass
 
 
-class BookIssueList(ListAPIView):
+class BookIssueListView(ListAPIView):
     queryset = BookIssue
     serializer_class = BookIssueSerializer
