@@ -1,10 +1,14 @@
+import datetime
+
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
 
-from library_management.models import Book, BookOrder, Genre, BookIssue
-from library_management.serializers import BookSerializer, BookOrderDetailSerializer, GenreSerializer, BookIssueSerializer
+from accounts.views import get_user
+from library_management.models import Book, BookOrder, Genre, BookIssue, BookOrderDetail
+from library_management.serializers import BookSerializer, BookOrderDetailSerializer, GenreSerializer, \
+    BookIssueSerializer, BookOrderSerializer
 
 
 class CreateBookView(APIView):
@@ -37,37 +41,81 @@ class BookListView(ListAPIView):
     serializer_class = BookSerializer
 
 
-class CreateBookOrderView(APIView):
+class CreateBookOrderDetailView(APIView):
     def post(self, request):
+        serializer = BookOrderDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            user = get_user(request)
+            book_id = request.data['book']
+
+            if not user:
+                response = {'detail': 'user NOT found!'}
+                return Response(response)
+
+            book = Book.objects.filter(id=book_id).first()
+            if not book:
+                response = {'detail': 'book NOT found!'}
+                return Response(response)
+
+            if not book.available:
+                response = {'detail': 'book NOT available!'}
+                return Response(response)
+
+            order, created = BookOrder.objects.get_or_create(user_id=user.id, status='open')
+            BookOrderDetail.objects.create(order=order, book_id=book.id)
+
+            date_return = order.date_taken + datetime.timedelta(days=15)
+            order.date_return = date_return
+            order.save()
+
+            book.available = False
+            book.save()
+
+            order_ser = BookOrderSerializer(order)
+            return Response(order_ser.data)
+
+        return Response(serializer.errors)
+
+
+class BookOrderDetailView(APIView):
+    def get(self, request, pk):
+        order = BookOrderDetail.objects.filter(pk=pk).first()
+        serializer = BookOrderDetailSerializer(order)
+
+        return Response(serializer.data)
+
+    def put(self, request, pk):
         pass
 
+    def delete(self, request, pk):
+        order = BookOrderDetail.objects.filter(pk=pk).first()
+        order.delete()
 
-class AddBookToOrderView(APIView):
-    def post(self, request):
+        response = {'detail': f'book order with id {order.id} deleted successfully!'}
+        return Response(response)
+
+
+class BookOrderView(APIView):
+    def get(self, request, pk):
+        order = BookOrder.objects.filter(pk=pk).first()
+        serializer = BookOrderSerializer(order)
+
+        return Response(serializer.data)
+
+    def put(self, request, pk):
         pass
 
+    def delete(self, request, pk):
+        order = BookOrder.objects.filter(pk=pk).first()
+        order.delete()
 
-# class BookOrderDetailView(APIView):
-#     def get(self, request, pk):
-#         order = BookOrder.objects.filter(pk=pk).first()
-#         serializer = BookOrderDetailSerializerSerializer(order)
-#
-#         return Response(serializer.data)
-#
-#     def put(self, request, pk):
-#         pass
-#
-#     def delete(self, request, pk):
-#         order = BookOrder.objects.filter(pk=pk).first()
-#         order.delete()
-#
-#         response = {'detail': f'book order with id {order.id} deleted successfully!'}
-#         return Response(response)
-#
-#
-# class BookOrderListView(ListAPIView):
-#     queryset = BookOrder.objects.all()
-#     serializer_class = BookOrderSerializer
+        response = {'detail': f'book order with id {order.id} deleted successfully!'}
+        return Response(response)
+
+
+class BookOrderListView(ListAPIView):
+    queryset = BookOrder.objects.all()
+    serializer_class = BookOrderSerializer
 
 
 class CreateGenreView(APIView):

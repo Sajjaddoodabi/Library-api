@@ -10,22 +10,21 @@ class BookSerializer(serializers.ModelSerializer):
         fields = ['id', 'isbn', 'title', 'author', 'date_written']
 
 
+class BookOrderDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookOrderDetail
+        read_only_fields = ('order',)
+        fields = ['id', 'order', 'book']
+
+
 class BookOrderSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    order_detail = BookOrderDetailSerializer(many=True)
 
     class Meta:
         model = BookOrder
-        read_only_fields = ('status',)
-        fields = ['id', 'user', 'date_taken', 'status']
-
-
-class BookOrderDetailSerializer(serializers.ModelSerializer):
-    book = BookSerializer(many=True, read_only=True)
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = BookOrderDetail
-        fields = ['id', 'order', 'book']
+        read_only_fields = ('status', 'date_return')
+        fields = ['id', 'user', 'order_detail', 'date_taken', 'date_return', 'status']
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -42,6 +41,6 @@ class BookIssueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BookIssue
-        read_only_field = ['status']
+        read_only_fields = ['status']
 
     fields = ['id', 'book', 'user', 'status', 'date']

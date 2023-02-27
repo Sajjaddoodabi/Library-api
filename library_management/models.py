@@ -21,8 +21,8 @@ class BookOrder(models.Model):
         Done = 'DON', 'done'
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='order')
-    date_taken = models.DateTimeField(auto_now_add=True)
-    date_return = models.DateField()
+    date_taken = models.DateField(auto_now_add=True)
+    date_return = models.DateField(blank=True, null=True)
     status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.Open)
 
     def __str__(self):
