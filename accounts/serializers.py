@@ -13,11 +13,24 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
+class UserMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        read_only_fields = ('is_librarian', 'is_active')
+        fields = ['id', 'username', 'email', 'mobile', 'is_librarian', 'is_active']
+        extra_kwargs = {
+            'mobile': {'required': False}
+        }
+
+
 class LibrarianSerializer(serializers.ModelSerializer):
     class Meta:
         model = Librarian
         read_only_fields = ('is_librarian', 'is_active')
-        fields = ['id', 'username', 'email', 'card_number', 'is_librarian', 'is_active']
+        fields = ['id', 'username', 'email', 'card_number', 'mobile', 'is_librarian', 'is_active']
+        extra_kwargs = {
+            'mobile': {'required': False}
+        }
 
 
 class ChangePasswordSerializer(serializers.ModelSerializer):

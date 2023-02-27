@@ -4,7 +4,7 @@ import jwt
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 
 from accounts.models import User, Librarian
 from accounts.serializers import UserSerializer, ChangePasswordSerializer, LibrarianSerializer
@@ -85,7 +85,7 @@ class LoginView(APIView):
         token = jwt.encode(payload, 'secret', algorithm='HS256')
 
         response = Response()
-        response.set_cookie(key=jwt, value=token, httponly=True)
+        response.set_cookie(key='jwt', value=token, httponly=True)
 
         response.data = {'jwt': token}
         return response
@@ -103,7 +103,8 @@ class UserView(APIView):
     def get(self, request):
         user = get_user(request)
         if not user:
-            raise AuthenticationFailed('User NOT found!')
+            response = {'detail': 'User NOT found!'}
+            return Response(response)
 
         serializer = UserSerializer(user)
         return Response(serializer.data)
@@ -118,7 +119,7 @@ def get_user(request):
     except jwt.ExpiredSignatureError:
         raise AuthenticationFailed('Unauthenticated!')
 
-    user = User.objects.filter(id=payload['id'])
+    user = User.objects.filter(id=payload['id']).first()
 
     return user
 
@@ -129,6 +130,16 @@ class UserLists(ListAPIView):
 
 
 class LibrarianLists(ListAPIView):
+    queryset = User.objects.filter(is_librarian=True)
+    serializer_class = LibrarianSerializer
+
+
+class UserDetail(RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class LibrarianDetail(RetrieveUpdateDestroyAPIView):
     queryset = User.objects.filter(is_librarian=True)
     serializer_class = LibrarianSerializer
 
