@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
 
@@ -8,7 +9,22 @@ from library_management.serializers import BookSerializer, BookOrderSerializer, 
 
 class CreateBookView(APIView):
     def post(self, request):
-        pass
+        serializer = BookSerializer(data=request.data)
+        if serializer.is_valid():
+            isbn = serializer.data['isbn']
+            title = serializer.data['title']
+            author = serializer.data['author']
+            date_written = serializer.data['date_written']
+
+            try:
+                book = Book.objects.create(isbn=isbn, title=title, author=author, date_written=date_written)
+            except Exception as e:
+                return Response(str(e))
+
+            book_ser = BookSerializer(book)
+            return Response(book_ser.data)
+
+        return Response(serializer.errors)
 
 
 class BookDetailView(RetrieveUpdateDestroyAPIView):
