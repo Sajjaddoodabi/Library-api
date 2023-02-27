@@ -15,13 +15,26 @@ class Book(models.Model):
 
 
 class BookOrder(models.Model):
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='order')
+    class OrderStatus(models.TextChoices):
+        Open = 'OPN', 'open'
+        Cancelled = 'CAN', 'cancelled'
+        Done = 'DON', 'done'
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='order')
     date_taken = models.DateTimeField(auto_now_add=True)
     date_return = models.DateField()
+    status = models.CharField(max_length=100, choices=OrderStatus.choices, default=OrderStatus.Open)
 
     def __str__(self):
-        return f'{self.book.title} - {self.user} - {self.date_return}'
+        return f'{self.user} - {self.status}'
+
+
+class BookOrderDetail(models.Model):
+    order = models.ForeignKey(BookOrder, on_delete=models.CASCADE, related_name='order_detail')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='order_detail')
+
+    def __str__(self):
+        return f'{self.book.title} - {self.order.user} - {self.order.date_taken}'
 
 
 class Genre(models.Model):

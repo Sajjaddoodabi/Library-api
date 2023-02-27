@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
 
 from library_management.models import Book, BookOrder, Genre, BookIssue
-from library_management.serializers import BookSerializer, BookOrderSerializer, GenreSerializer, BookIssueSerializer
+from library_management.serializers import BookSerializer, BookOrderDetailSerializer, GenreSerializer, BookIssueSerializer
 
 
 class CreateBookView(APIView):
@@ -47,27 +47,27 @@ class AddBookToOrderView(APIView):
         pass
 
 
-class BookOrderDetailView(APIView):
-    def get(self, request, pk):
-        order = BookOrder.objects.filter(pk=pk).first()
-        serializer = BookOrderSerializer(order)
-
-        return Response(serializer.data)
-
-    def put(self, request, pk):
-        pass
-
-    def delete(self, request, pk):
-        order = BookOrder.objects.filter(pk=pk).first()
-        order.delete()
-
-        response = {'detail': f'book order with id {order.id} deleted successfully!'}
-        return Response(response)
-
-
-class BookOrderListView(ListAPIView):
-    queryset = BookOrder.objects.all()
-    serializer_class = BookOrderSerializer
+# class BookOrderDetailView(APIView):
+#     def get(self, request, pk):
+#         order = BookOrder.objects.filter(pk=pk).first()
+#         serializer = BookOrderDetailSerializerSerializer(order)
+#
+#         return Response(serializer.data)
+#
+#     def put(self, request, pk):
+#         pass
+#
+#     def delete(self, request, pk):
+#         order = BookOrder.objects.filter(pk=pk).first()
+#         order.delete()
+#
+#         response = {'detail': f'book order with id {order.id} deleted successfully!'}
+#         return Response(response)
+#
+#
+# class BookOrderListView(ListAPIView):
+#     queryset = BookOrder.objects.all()
+#     serializer_class = BookOrderSerializer
 
 
 class CreateGenreView(APIView):

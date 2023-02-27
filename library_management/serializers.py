@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from library_management.models import Book, BookOrder, BookIssue, Genre
+from library_management.models import Book, BookOrder, BookIssue, Genre, BookOrderDetail
 from accounts.serializers import UserSerializer
 
 
@@ -11,12 +11,21 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class BookOrderSerializer(serializers.ModelSerializer):
-    book = BookSerializer(many=True, read_only=True)
     user = UserSerializer(read_only=True)
 
     class Meta:
         model = BookOrder
-        fields = ['id', 'book', 'user', 'date_taken']
+        read_only_fields = ('status',)
+        fields = ['id', 'user', 'date_taken', 'status']
+
+
+class BookOrderDetailSerializer(serializers.ModelSerializer):
+    book = BookSerializer(many=True, read_only=True)
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = BookOrderDetail
+        fields = ['id', 'order', 'book']
 
 
 class GenreSerializer(serializers.ModelSerializer):

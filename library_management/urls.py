@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import CreateBookView, BookDetailView, BookListView, CreateBookOrderView, BookOrderListView, \
-    BookOrderDetailView, AddBookToOrderView, CreateGenreView, GenreDetailView, GenreListView, CreateBookIssueView, \
+from .views import CreateBookView, BookDetailView, BookListView, CreateBookOrderView, AddBookToOrderView, \
+    CreateGenreView, GenreDetailView, GenreListView, CreateBookIssueView, \
     BookIssueDetailView, BookIssueListView
 
 urlpatterns = [
@@ -15,6 +15,6 @@ urlpatterns = [
     path('book/issue/list/', BookIssueListView.as_view()),
     path('book-order/add-order/', CreateBookOrderView.as_view()),
     path('book-order/add-order/add-book/', AddBookToOrderView.as_view()),
-    path('book-order/detail/<int:pk>/', BookOrderDetailView.as_view()),
-    path('book-order/list/', BookOrderListView.as_view()),
+    # path('book-order/detail/<int:pk>/', BookOrderDetailView.as_view()),
+    # path('book-order/list/', BookOrderListView.as_view()),
 ]
