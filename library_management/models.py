@@ -49,6 +49,7 @@ class BookIssue(models.Model):
     class RequestStatus(models.TextChoices):
         Requested = 'REQ', 'requested'
         Denied = 'DEN', 'denied'
+        Progress = 'PRG', 'progress'
         Done = 'DON', 'done'
 
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='book_issue')

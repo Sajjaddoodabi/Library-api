@@ -45,3 +45,9 @@ class BookIssueSerializer(serializers.ModelSerializer):
         model = BookIssue
         read_only_fields = ['status']
         fields = ['id', 'book', 'user', 'description', 'status', 'date']
+
+
+class BookIssueMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookIssue
+        fields = ['status']

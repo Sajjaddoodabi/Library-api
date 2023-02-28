@@ -7,7 +7,7 @@ from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
 from accounts.views import get_user
 from library_management.models import Book, BookOrder, Genre, BookIssue, BookOrderDetail
 from library_management.serializers import BookSerializer, BookOrderDetailSerializer, GenreSerializer, \
-    BookIssueSerializer, BookOrderSerializer
+    BookIssueSerializer, BookOrderSerializer, BookIssueMiniSerializer
 
 
 class CreateBookView(APIView):
@@ -273,3 +273,45 @@ class BookIssueDetailView(APIView):
 class BookIssueListView(ListAPIView):
     queryset = BookIssue
     serializer_class = BookIssueSerializer
+
+
+class ChangeIssueProgress(APIView):
+    def patch(self, request, pk):
+        issue = BookIssue.objects.filter(pk=pk).first()
+
+        if not issue:
+            response = {'detail': 'issue NOT found!'}
+            return Response(response)
+
+        if issue.status == 'requested':
+            issue.status = 'progress'
+            issue.save()
+
+            response = {'detail': 'issue status changed to progress!'}
+            return Response(response)
+
+        response = {'detail': 'cant change this status!'}
+        return Response(response)
+
+
+class ChangeIssueStatus(APIView):
+    def patch(self, request, pk):
+        serializer = BookIssueMiniSerializer(data=request.data)
+        if serializer.is_valid():
+            issue = BookIssue.objects.filter(pk=pk).first()
+            status = serializer.data['status']
+
+            if not issue:
+                response = {'detail': 'issue NOT found!'}
+                return Response(response)
+
+            if issue.status == 'requested':
+                issue.status = status
+                issue.save()
+
+                response = {'detail': f'issue status changed to {status}!'}
+                return Response(response)
+
+            response = {'detail': 'cant change this status!'}
+            return Response(response)
+        return Response(serializer.errors)
