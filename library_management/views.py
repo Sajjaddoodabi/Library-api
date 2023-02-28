@@ -47,29 +47,28 @@ class CreateBookOrderDetailView(APIView):
         if serializer.is_valid():
             user = get_user(request)
             book_id = request.data['book']
+            book = Book.objects.filter(id=book_id).first()
 
             if not user:
                 response = {'detail': 'user NOT found!'}
                 return Response(response)
 
-            book = Book.objects.filter(id=book_id).first()
             if not book:
                 response = {'detail': 'book NOT found!'}
                 return Response(response)
 
-            if not book.available:
-                response = {'detail': 'book NOT available!'}
+            order, created = BookOrder.objects.get_or_create(user_id=user.id, status='open')
+
+            book_exist = BookOrderDetail.objects.filter(order=order, book_id=book_id).exists()
+            if not book_exist:
+                response = {'detail': 'you already have tis book in your order!'}
                 return Response(response)
 
-            order, created = BookOrder.objects.get_or_create(user_id=user.id, status='open')
             BookOrderDetail.objects.create(order=order, book_id=book.id)
 
             date_return = order.date_taken + datetime.timedelta(days=15)
             order.date_return = date_return
             order.save()
-
-            book.available = False
-            book.save()
 
             order_ser = BookOrderSerializer(order)
             return Response(order_ser.data)
@@ -92,6 +91,39 @@ class BookOrderDetailView(APIView):
         order.delete()
 
         response = {'detail': f'book order with id {order.id} deleted successfully!'}
+        return Response(response)
+
+
+class BookOrderConfirm(APIView):
+    def post(self, request):
+        user = get_user(request)
+        order = BookOrder.objects.filter(user_id=user.id, status='open').first()
+        order_detail = BookOrderDetail.objects.filter(order=order)
+
+        if not order:
+            response = {'detail': 'order NOT found!'}
+            return Response(response)
+
+        for detail in order_detail:
+            detail.book.available = False
+            detail.book.save()
+
+        response = {'detail': 'confirmed!'}
+        return Response(response)
+
+
+class BookOrderCancel(APIView):
+    def post(self, request):
+        user = get_user(request)
+        order = BookOrder.objects.filter(user_id=user.id, status='open').first()
+
+        if not order:
+            response = {'detail': 'order NOT found!'}
+            return Response(response)
+
+        order.delete()
+
+        response = {'detail': 'cancelled!'}
         return Response(response)
 
 

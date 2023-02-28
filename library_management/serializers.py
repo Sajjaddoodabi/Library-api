@@ -11,6 +11,8 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class BookOrderDetailSerializer(serializers.ModelSerializer):
+    book = serializers.CharField(source='book.title')
+
     class Meta:
         model = BookOrderDetail
         read_only_fields = ('order',)
