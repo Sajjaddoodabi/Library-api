@@ -90,11 +90,11 @@ class BookOrderDetailView(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request, pk):
-        serializer = BookOrderDetailSerializer(data=request.data)
-        if serializer.is_valid():
-            pass
-        return Response(serializer.errors)
+    # def put(self, request, pk):
+    #     serializer = BookOrderDetailSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         pass
+    #     return Response(serializer.errors)
 
     def delete(self, request, pk):
         order = BookOrderDetail.objects.filter(pk=pk).first()
@@ -205,8 +205,26 @@ class GenreListView(ListAPIView):
 
 
 class CreateBookIssueView(APIView):
-    def post(self, request):
-        pass
+    def post(self, request, pk):
+        serializer = BookIssueSerializer(data=request.data)
+        if serializer.is_valid():
+            user = get_user(request)
+            book = Book.objects.filter(pk=pk).first()
+            description = serializer.data['description']
+
+            if not user:
+                response = {'detail': 'user NOT found!'}
+                return Response(response)
+
+            if not book:
+                response = {'detail': 'book NOT found!'}
+                return Response(response)
+
+            issue = BookIssue.objects.create(user=user, book=book, description=description)
+            issue_ser = BookIssueSerializer(issue)
+
+            return Response(issue_ser.data)
+        return Response(serializer.errors)
 
 
 class BookIssueDetailView(APIView):

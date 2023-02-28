@@ -44,5 +44,4 @@ class BookIssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookIssue
         read_only_fields = ['status']
-
-    fields = ['id', 'book', 'user', 'status', 'date']
+        fields = ['id', 'book', 'user', 'description', 'status', 'date']

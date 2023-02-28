@@ -53,6 +53,7 @@ class BookIssue(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='book_issue')
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='book_issue')
+    description = models.TextField(max_length=500)
     status = models.CharField(max_length=20, choices=RequestStatus.choices, default=RequestStatus.Requested)
     date = models.DateTimeField(auto_now_add=True)
 
