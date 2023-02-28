@@ -91,7 +91,10 @@ class BookOrderDetailView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
-        pass
+        serializer = BookOrderDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            pass
+        return Response(serializer.errors)
 
     def delete(self, request, pk):
         order = BookOrderDetail.objects.filter(pk=pk).first()
@@ -115,6 +118,9 @@ class BookOrderConfirm(APIView):
             detail.book.available = False
             detail.book.save()
 
+        order.status = 'done'
+        order.save()
+
         response = {'detail': 'confirmed!'}
         return Response(response)
 
@@ -128,7 +134,7 @@ class BookOrderCancel(APIView):
             response = {'detail': 'order NOT found!'}
             return Response(response)
 
-        order.delete()
+        order.status = 'cancelled'
 
         response = {'detail': 'cancelled!'}
         return Response(response)
@@ -140,6 +146,24 @@ class BookOrderView(APIView):
         serializer = BookOrderSerializer(order)
 
         return Response(serializer.data)
+
+    def patch(self, request, pk):
+        order = BookOrder.objects.filter(pk=pk).first()
+        date_return = request.data['date_return']
+
+        if not order:
+            response = {'detail': 'order NOT found!'}
+            return Response(response)
+
+        if not date_return:
+            response = {'detail': 'field required!'}
+            return Response(response)
+
+        order.date_return = date_return
+        order.save()
+
+        order_ser = BookOrderSerializer(order)
+        return Response(order_ser.data)
 
     def put(self, request, pk):
         pass
