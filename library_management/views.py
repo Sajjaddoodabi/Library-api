@@ -234,8 +234,33 @@ class BookIssueDetailView(APIView):
 
         return Response(serializer.data)
 
-    def put(self, request, pk):
-        pass
+    def patch(self, request, pk):
+        serializer = BookIssueSerializer(data=request.data)
+        if serializer.is_valid():
+            user = get_user(request)
+            book = Book.objects.filter(pk=pk).first()
+            description = serializer.data['description']
+
+            if not user:
+                response = {'detail': 'user NOT found!'}
+                return Response(response)
+
+            if not book:
+                response = {'detail': 'book NOT found!'}
+                return Response(response)
+
+            issue = BookIssue.objects.filter(user=user, book=book, description=description).first()
+            if not issue:
+                response = {'detail': 'issue NOT found!'}
+                return Response(response)
+
+            issue.description = description
+            issue.save()
+
+            issue_ser = BookIssueSerializer(issue)
+
+            return Response(issue_ser.data)
+        return Response(serializer.errors)
 
     def delete(self, request, pk):
         book_issue = BookIssue.objects.filter(pk=pk).first()
