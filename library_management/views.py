@@ -118,8 +118,9 @@ class BookOrderConfirm(APIView):
             detail.book.available = False
             detail.book.save()
 
-        order.status = 'done'
-        order.save()
+        if order.status == 'progress':
+            order.status = 'done'
+            order.save()
 
         response = {'detail': 'confirmed!'}
         return Response(response)
@@ -173,6 +174,25 @@ class BookOrderView(APIView):
         order.delete()
 
         response = {'detail': f'book order with id {order.id} deleted successfully!'}
+        return Response(response)
+
+
+class ChangeOrderProgress(APIView):
+    def patch(self, request, pk):
+        order = BookOrder.objects.filter(pk=pk).first()
+
+        if not order:
+            response = {'detail': 'issue NOT found!'}
+            return Response(response)
+
+        if order.status == 'requested':
+            order.status = 'progress'
+            order.save()
+
+            response = {'detail': 'order status changed to progress!'}
+            return Response(response)
+
+        response = {'detail': 'cant change this status!'}
         return Response(response)
 
 

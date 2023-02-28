@@ -18,6 +18,7 @@ class BookOrder(models.Model):
     class OrderStatus(models.TextChoices):
         Open = 'OPN', 'open'
         Cancelled = 'CAN', 'cancelled'
+        Progress = 'PRG', 'progress'
         Done = 'DON', 'done'
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='order')
