@@ -2,7 +2,8 @@ from django.urls import path
 from .views import CreateBookView, BookDetailView, BookListView, BookOrderDetailView, \
     CreateGenreView, GenreDetailView, GenreListView, CreateBookIssueView, \
     BookIssueDetailView, BookIssueListView, BookOrderListView, CreateBookOrderDetailView, BookOrderView, \
-    BookOrderConfirm, BookOrderCancel, ChangeIssueStatus, ChangeIssueProgress, ChangeOrderProgress
+    BookOrderConfirm, BookOrderCancel, ChangeIssueStatus, ChangeIssueProgress, ChangeOrderProgress, \
+    ChangeOrderDateReturn
 
 urlpatterns = [
     path('book/add-book/', CreateBookView.as_view()),
@@ -17,6 +18,7 @@ urlpatterns = [
     path('book/issue/detail/<int:pk>/status/', ChangeIssueStatus.as_view()),
     path('book/issue/list/', BookIssueListView.as_view()),
     path('book-order/detail/<int:pk>/', BookOrderView.as_view()),
+    path('book-order/detail/<int:pk>/change-date-return/', ChangeOrderDateReturn.as_view()),
     path('book-order/detail/<int:pk>/progress/', ChangeOrderProgress.as_view()),
     path('book-order/add-book/', BookOrderDetailView.as_view()),
     path('book-order/detail/add-detail/', CreateBookOrderDetailView.as_view()),

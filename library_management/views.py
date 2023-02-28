@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
 
+from accounts.permissions import IsAdmin, IsAdminOrReadOnly, IsLibrarian, IsAuthenticated
 from accounts.views import get_user
 from library_management.models import Book, BookOrder, Genre, BookIssue, BookOrderDetail
 from library_management.serializers import BookSerializer, BookOrderDetailSerializer, GenreSerializer, \
@@ -11,6 +12,8 @@ from library_management.serializers import BookSerializer, BookOrderDetailSerial
 
 
 class CreateBookView(APIView):
+    # permission_classes = (IsLibrarian,)
+
     def post(self, request):
         serializer = BookSerializer(data=request.data)
         if serializer.is_valid():
@@ -39,16 +42,20 @@ class CreateBookView(APIView):
 
 
 class BookDetailView(RetrieveUpdateDestroyAPIView):
+    # permission_classes = (IsLibrarian,)
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
 
 class BookListView(ListAPIView):
+    # permission_classes = (IsAuthenticated,)
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
 
 class CreateBookOrderDetailView(APIView):
+    # permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         serializer = BookOrderDetailSerializer(data=request.data)
         if serializer.is_valid():
@@ -84,11 +91,18 @@ class CreateBookOrderDetailView(APIView):
 
 
 class BookOrderDetailView(APIView):
-    def get(self, request, pk):
-        order = BookOrderDetail.objects.filter(pk=pk).first()
-        serializer = BookOrderDetailSerializer(order)
+    # permission_classes = (IsAuthenticated,)
 
-        return Response(serializer.data)
+    def get(self, request, pk):
+        user = get_user(request)
+        order = BookOrderDetail.objects.filter(pk=pk).first()
+
+        if user == order.order.user:
+            serializer = BookOrderDetailSerializer(order)
+            return Response(serializer.data)
+
+        response = {'detail': 'Not found!'}
+        return Response(response)
 
     # def put(self, request, pk):
     #     serializer = BookOrderDetailSerializer(data=request.data)
@@ -97,14 +111,23 @@ class BookOrderDetailView(APIView):
     #     return Response(serializer.errors)
 
     def delete(self, request, pk):
+        user = get_user(request)
         order = BookOrderDetail.objects.filter(pk=pk).first()
-        order.delete()
 
-        response = {'detail': f'book order with id {order.id} deleted successfully!'}
+        if user == order.order.user:
+            order.delete()
+
+            response = {'detail': f'book order with id {order.id} deleted successfully!'}
+            return Response(response)
+
+        response = {'detail': 'Not found!'}
         return Response(response)
 
 
+
 class BookOrderConfirm(APIView):
+    # permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         user = get_user(request)
         order = BookOrder.objects.filter(user_id=user.id, status='open').first()
@@ -127,6 +150,8 @@ class BookOrderConfirm(APIView):
 
 
 class BookOrderCancel(APIView):
+    # permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         user = get_user(request)
         order = BookOrder.objects.filter(user_id=user.id, status='open').first()
@@ -142,11 +167,37 @@ class BookOrderCancel(APIView):
 
 
 class BookOrderView(APIView):
-    def get(self, request, pk):
-        order = BookOrder.objects.filter(pk=pk).first()
-        serializer = BookOrderSerializer(order)
+    # permission_classes = (IsAuthenticated,)
 
-        return Response(serializer.data)
+    def get(self, request, pk):
+        user = get_user(request)
+        order = BookOrder.objects.filter(pk=pk).first()
+
+        if user == order.user:
+            serializer = BookOrderSerializer(order)
+            return Response(serializer.data)
+
+        response = {'detail': 'Not found!'}
+        return Response(response)
+
+    def put(self, request, pk):
+        pass
+
+    def delete(self, request, pk):
+        user = get_user(request)
+        order = BookOrder.objects.filter(pk=pk).first()
+
+        if user == order.user:
+            order.delete()
+
+            response = {'detail': f'book order with id {order.id} deleted successfully!'}
+            return Response(response)
+
+        response = {'detail': 'Not found!'}
+        return Response(response)
+
+class ChangeOrderDateReturn(APIView):
+    # permission_classes = (IsLibrarian,)
 
     def patch(self, request, pk):
         order = BookOrder.objects.filter(pk=pk).first()
@@ -166,18 +217,10 @@ class BookOrderView(APIView):
         order_ser = BookOrderSerializer(order)
         return Response(order_ser.data)
 
-    def put(self, request, pk):
-        pass
-
-    def delete(self, request, pk):
-        order = BookOrder.objects.filter(pk=pk).first()
-        order.delete()
-
-        response = {'detail': f'book order with id {order.id} deleted successfully!'}
-        return Response(response)
-
 
 class ChangeOrderProgress(APIView):
+    # permission_classes = (IsLibrarian,)
+
     def patch(self, request, pk):
         order = BookOrder.objects.filter(pk=pk).first()
 
@@ -197,11 +240,14 @@ class ChangeOrderProgress(APIView):
 
 
 class BookOrderListView(ListAPIView):
+    # permission_classes = (IsAdmin,)
     queryset = BookOrder.objects.all()
     serializer_class = BookOrderSerializer
 
 
 class CreateGenreView(APIView):
+    # permission_classes = (IsAdmin,)
+
     def post(self, request):
         serializer = GenreSerializer(data=request.data)
         if serializer.is_valid():
@@ -215,16 +261,20 @@ class CreateGenreView(APIView):
 
 
 class GenreDetailView(RetrieveUpdateDestroyAPIView):
+    # permission_classes = (IsAdmin,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
 class GenreListView(ListAPIView):
+    # permission_classes = (IsAuthenticated,)
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
 class CreateBookIssueView(APIView):
+    # permission_classes = (IsAuthenticated,)
+
     def post(self, request, pk):
         serializer = BookIssueSerializer(data=request.data)
         if serializer.is_valid():
@@ -248,11 +298,18 @@ class CreateBookIssueView(APIView):
 
 
 class BookIssueDetailView(APIView):
-    def get(self, request, pk):
-        book_issue = BookIssue.objects.filter(pk=pk).first()
-        serializer = BookIssueSerializer(book_issue)
+    # permission_classes = (IsAuthenticated,)
 
-        return Response(serializer.data)
+    def get(self, request, pk):
+        user = get_user(request)
+        book_issue = BookIssue.objects.filter(pk=pk).first()
+
+        if user == book_issue.user:
+            serializer = BookIssueSerializer(book_issue)
+            return Response(serializer.data)
+
+        response = {'detail': 'Not found!'}
+        return Response(response)
 
     def patch(self, request, pk):
         serializer = BookIssueSerializer(data=request.data)
@@ -283,19 +340,28 @@ class BookIssueDetailView(APIView):
         return Response(serializer.errors)
 
     def delete(self, request, pk):
+        user = get_user(request)
         book_issue = BookIssue.objects.filter(pk=pk).first()
-        book_issue.delete()
 
-        response = {'detail': f'book issue with id {book_issue.id} deleted successfully!'}
+        if user == book_issue.user:
+            book_issue.delete()
+
+            response = {'detail': f'book issue with id {book_issue.id} deleted successfully!'}
+            return Response(response)
+
+        response = {'detail': 'Not found!'}
         return Response(response)
 
 
 class BookIssueListView(ListAPIView):
+    # permission_classes = (IsAdmin,)
     queryset = BookIssue
     serializer_class = BookIssueSerializer
 
 
 class ChangeIssueProgress(APIView):
+    # permission_classes = (IsAdmin,)
+
     def patch(self, request, pk):
         issue = BookIssue.objects.filter(pk=pk).first()
 
@@ -315,6 +381,8 @@ class ChangeIssueProgress(APIView):
 
 
 class ChangeIssueStatus(APIView):
+    # permission_classes = (IsAdmin,)
+
     def patch(self, request, pk):
         serializer = BookIssueMiniSerializer(data=request.data)
         if serializer.is_valid():

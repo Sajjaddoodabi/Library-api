@@ -40,7 +40,7 @@ class IsLibrarian(BasePermission):
         user = get_user(request)
         if request.method in SAFE_METHODS:
             return True
-        return bool(user.is_authenticated and user.is_librarian)
+        return bool((user.is_authenticated and user.is_librarian) or user.is_staff)
 
 
 class IsAdmin(BasePermission):
