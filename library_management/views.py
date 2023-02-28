@@ -1,6 +1,5 @@
 import datetime
 
-from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListAPIView
@@ -19,11 +18,19 @@ class CreateBookView(APIView):
             title = serializer.data['title']
             author = serializer.data['author']
             date_written = serializer.data['date_written']
+            genre = request.data['genre']
+
+            genre = Genre.objects.filter(title=genre).first()
+            if not genre:
+                response = {'detail': 'genre NOT found!'}
+                return Response(response)
 
             try:
                 book = Book.objects.create(isbn=isbn, title=title, author=author, date_written=date_written)
             except Exception as e:
                 return Response(str(e))
+
+            genre = Genre.objects.create(title=genre, book_id=book.id)
 
             book_ser = BookSerializer(book)
             return Response(book_ser.data)
@@ -152,7 +159,15 @@ class BookOrderListView(ListAPIView):
 
 class CreateGenreView(APIView):
     def post(self, request):
-        pass
+        serializer = GenreSerializer(data=request.data)
+        if serializer.is_valid():
+            title = serializer.data['title']
+
+            genre = Genre.objects.create(title=title)
+            genre_ser = GenreSerializer(genre)
+
+            return Response(genre_ser.data)
+        return Response(serializer.errors)
 
 
 class GenreDetailView(RetrieveUpdateDestroyAPIView):

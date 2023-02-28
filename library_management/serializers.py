@@ -4,10 +4,18 @@ from library_management.models import Book, BookOrder, BookIssue, Genre, BookOrd
 from accounts.serializers import UserSerializer
 
 
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['id', 'title']
+
+
 class BookSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+
     class Meta:
         model = Book
-        fields = ['id', 'isbn', 'title', 'author', 'date_written']
+        fields = ['id', 'isbn', 'title', 'author', 'genre', 'date_written']
 
 
 class BookOrderDetailSerializer(serializers.ModelSerializer):
@@ -27,14 +35,6 @@ class BookOrderSerializer(serializers.ModelSerializer):
         model = BookOrder
         read_only_fields = ('status', 'date_return')
         fields = ['id', 'user', 'order_detail', 'date_taken', 'date_return', 'status']
-
-
-class GenreSerializer(serializers.ModelSerializer):
-    book = BookSerializer(many=True)
-
-    class Meta:
-        model = Genre
-        fields = ['id', 'title', 'book']
 
 
 class BookIssueSerializer(serializers.ModelSerializer):
