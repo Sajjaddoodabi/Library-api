@@ -13,7 +13,7 @@ from accounts.permissions import IsNotAuthenticated, IsAuthenticated, IsAdmin, I
 
 
 class UserRegisterView(APIView):
-    # permission_classes = (IsNotAuthenticated,)
+    permission_classes = (IsNotAuthenticated,)
 
     def post(self, request):
         try:
@@ -38,7 +38,7 @@ class UserRegisterView(APIView):
 
 
 class LibrarianRegisterView(APIView):
-    # permission_classes = (IsNotAuthenticated,)
+    permission_classes = (IsNotAuthenticated,)
 
     def post(self, request):
         try:
@@ -69,7 +69,7 @@ class LibrarianRegisterView(APIView):
 
 
 class LoginView(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         email = request.data['email']
@@ -100,7 +100,7 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         response = Response()
@@ -110,7 +110,7 @@ class LogoutView(APIView):
 
 
 class UserView(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request):
         user = get_user(request)
@@ -137,31 +137,31 @@ def get_user(request):
 
 
 class UserLists(ListAPIView):
-    # permission_classes = (IsAdmin,)
+    permission_classes = (IsAdmin,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 class LibrarianLists(ListAPIView):
-    # permission_classes = (IsAdmin,)
+    permission_classes = (IsAdmin,)
     queryset = User.objects.filter(is_librarian=True)
     serializer_class = LibrarianSerializer
 
 
 class UserDetail(RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 
 class LibrarianDetail(RetrieveUpdateDestroyAPIView):
-    # permission_classes = (IsLibrarian,)
+    permission_classes = (IsLibrarian,)
     queryset = User.objects.filter(is_librarian=True)
     serializer_class = LibrarianSerializer
 
 
 class ChangePasswordView(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         serializer = ChangePasswordSerializer(request.data)
