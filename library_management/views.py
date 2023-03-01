@@ -124,7 +124,6 @@ class BookOrderDetailView(APIView):
         return Response(response)
 
 
-
 class BookOrderConfirm(APIView):
     # permission_classes = (IsAuthenticated,)
 
@@ -195,6 +194,7 @@ class BookOrderView(APIView):
 
         response = {'detail': 'Not found!'}
         return Response(response)
+
 
 class ChangeOrderDateReturn(APIView):
     # permission_classes = (IsLibrarian,)
@@ -403,3 +403,60 @@ class ChangeIssueStatus(APIView):
             response = {'detail': 'cant change this status!'}
             return Response(response)
         return Response(serializer.errors)
+
+
+class SearchBook(APIView):
+    def get(self, request, title):
+        books = Book.objects.filter(title__contains=title)
+        book = Book.objects.filter(isbn__exact=title).first()
+
+        if books:
+            book_ser = BookSerializer(books, many=True)
+
+            return Response(book_ser.data)
+
+        if book:
+            book_ser = BookSerializer(book)
+            return Response(book_ser.data)
+
+        response = {'detail': 'NOT found!'}
+        return Response(response)
+
+
+class SearchGenre(APIView):
+    def get(self, request, genre):
+        genres = Book.objects.filter(genre__title__contains=genre)
+
+        if genres:
+            genre_ser = BookSerializer(genres, many=True)
+
+            return Response(genre_ser.data)
+
+        response = {'detail': 'NOT found!'}
+        return Response(response)
+
+
+class SearchAuthor(APIView):
+    def get(self, request, author):
+        authors = Book.objects.filter(author__contains=author)
+
+        if authors:
+            book_ser = BookSerializer(authors, many=True)
+
+            return Response(book_ser.data)
+
+        response = {'detail': 'NOT found!'}
+        return Response(response)
+
+
+class SearchByDate(APIView):
+    def get(self, request, date, to_date):
+        books = Book.objects.filter(date_written__gte=date, date_written__lte=to_date)
+
+        if books:
+            book_ser = BookSerializer(books, many=True)
+
+            return Response(book_ser.data)
+
+        response = {'detail': 'NOT found!'}
+        return Response(response)

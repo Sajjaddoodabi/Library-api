@@ -3,7 +3,7 @@ from .views import CreateBookView, BookDetailView, BookListView, BookOrderDetail
     CreateGenreView, GenreDetailView, GenreListView, CreateBookIssueView, \
     BookIssueDetailView, BookIssueListView, BookOrderListView, CreateBookOrderDetailView, BookOrderView, \
     BookOrderConfirm, BookOrderCancel, ChangeIssueStatus, ChangeIssueProgress, ChangeOrderProgress, \
-    ChangeOrderDateReturn
+    ChangeOrderDateReturn, SearchBook, SearchAuthor, SearchGenre, SearchByDate
 
 urlpatterns = [
     path('book/add-book/', CreateBookView.as_view()),
@@ -25,4 +25,9 @@ urlpatterns = [
     path('book-order/list/', BookOrderListView.as_view()),
     path('book-order/confirm/', BookOrderConfirm.as_view()),
     path('book-order/cancel/', BookOrderCancel.as_view()),
+
+    path('search/title/<str:ttile>/', SearchBook.as_view()),
+    path('search/author/<str:author>/', SearchAuthor.as_view()),
+    path('search/genre/<str:genre>/', SearchGenre.as_view()),
+    path('search/date/<str:date>/<str:to_date>', SearchByDate.as_view()),
 ]
